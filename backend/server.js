@@ -7,8 +7,18 @@ const mongoose = require('mongoose');
 // Load environment variables
 dotenv.config();
 
+const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 5001;
+const cors = require('cors');
+app.use(cors({
+  origin: ['https://YOUR-NETLIFY-SITE.netlify.app', 'https://YOUR-CUSTOM-DOMAIN.com'],
+  credentials: true, // only if you use cookies/auth
+}));
+
+app.get('/health', (_, res) => res.send('ok'));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`API on ${PORT}`));
 
 // Middleware
 app.use(helmet());
