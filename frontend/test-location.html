@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediBudy Location Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 150px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>MediBudy Location API Test</h1>
+    
+    <!-- Browser Location Detection -->
+    <div class="container">
+        <h2>1. Browser Location Detection</h2>
+        <button onclick="getCurrentLocation()">Get My Location</button>
+        <div id="locationResult" class="result"></div>
+    </div>
+
+    <!-- Manual Location Input -->
+    <div class="container">
+        <h2>2. Manual Location Testing</h2>
+        <input type="number" id="lat" placeholder="Latitude" value="28.6139" step="any">
+        <input type="number" id="lng" placeholder="Longitude" value="77.2090" step="any">
+        <button onclick="testManualLocation()">Test Location</button>
+        <div id="manualResult" class="result"></div>
+    </div>
+
+    <!-- Reverse Geocoding -->
+    <div class="container">
+        <h2>3. Reverse Geocoding (Coordinates to Address)</h2>
+        <button onclick="testReverseGeocode()">Get Address for Delhi Coordinates</button>
+        <div id="reverseResult" class="result"></div>
+    </div>
+
+    <!-- Nearby Hospitals -->
+    <div class="container">
+        <h2>4. Nearby Hospitals</h2>
+        <button onclick="findNearbyHospitals()">Find Nearby Hospitals</button>
+        <button onclick="findCardiologyHospitals()">Find Cardiology Hospitals</button>
+        <div id="hospitalsResult" class="result"></div>
+    </div>
+
+    <!-- Nearby Doctors -->
+    <div class="container">
+        <h2>5. Nearby Doctors</h2>
+        <button onclick="findNearbyDoctors()">Find All Doctors</button>
+        <button onclick="findCardiologists()">Find Cardiologists</button>
+        <div id="doctorsResult" class="result"></div>
+    </div>
+
+    <!-- Combined Healthcare -->
+    <div class="container">
+        <h2>6. Combined Healthcare Search</h2>
+        <button onclick="findNearbyHealthcare()">Find Nearby Healthcare</button>
+        <div id="healthcareResult" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001/api';
+
+        // Browser Location Detection
+        function getCurrentLocation() {
+            const resultDiv = document.getElementById('locationResult');
+            resultDiv.innerHTML = 'Getting your location...';
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        resultDiv.innerHTML = `<span class="success">✓ Browser Location Detected:</span>\nLatitude: ${lat}\nLongitude: ${lng}`;
+                        
+                        // Test reverse geocoding with the detected location
+                        try {
+                            const response = await fetch(`${API_BASE}/location/reverse-geocode`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ lat, lng })
+                            });
+                            
+                            const data = await response.json();
+                            resultDiv.innerHTML += `\n\n<span class="success">✓ Address Found:</span>\n${JSON.stringify(data, null, 2)}`;
+                        } catch (error) {
+                            resultDiv.innerHTML += `\n\n<span class="error">✗ Reverse Geocoding Failed:</span>\n${error.message}`;
+                        }
+                    },
+                    (error) => {
+                        resultDiv.innerHTML = `<span class="error">✗ Location Error:</span>\n${error.message}`;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                resultDiv.innerHTML = '<span class="error">✗ Geolocation not supported</span>';
+            }
+        }
+
+        // Manual Location Testing
+        async function testManualLocation() {
+            const lat = document.getElementById('lat').value;
+            const lng = document.getElementById('lng').value;
+            const resultDiv = document.getElementById('manualResult');
+            
+            resultDiv.innerHTML = 'Testing manual location...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/reverse-geocode`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lat: parseFloat(lat), lng: parseFloat(lng) })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ Success:</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+
+        // Reverse Geocoding Test
+        async function testReverseGeocode() {
+            const resultDiv = document.getElementById('reverseResult');
+            resultDiv.innerHTML = 'Getting address...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/reverse-geocode`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lat: 28.6139, lng: 77.2090 })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<span class="success">✓ Address Found:</span>\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+
+        // Find Nearby Hospitals
+        async function findNearbyHospitals() {
+            const resultDiv = document.getElementById('hospitalsResult');
+            resultDiv.innerHTML = 'Finding nearby hospitals...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/nearby-hospitals?lat=28.6139&lng=77.2090&radius=10&limit=3`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `<span class="success">✓ Found ${data.hospitals.length} hospitals:</span>\n`;
+                data.hospitals.forEach((hospital, index) => {
+                    resultDiv.innerHTML += `\n${index + 1}. ${hospital.name}\n   Location: ${hospital.location.city}, ${hospital.location.state}\n   Distance: ${hospital.distance} km\n   Rating: ${hospital.rating.value}/5 (${hospital.rating.total_reviews} reviews)\n`;
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+
+        async function findCardiologyHospitals() {
+            const resultDiv = document.getElementById('hospitalsResult');
+            resultDiv.innerHTML = 'Finding cardiology hospitals...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/nearby-hospitals?lat=28.6139&lng=77.2090&radius=20&specialty=cardiology&limit=5`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `<span class="success">✓ Found ${data.hospitals.length} cardiology hospitals:</span>\n`;
+                data.hospitals.forEach((hospital, index) => {
+                    resultDiv.innerHTML += `\n${index + 1}. ${hospital.name}\n   Specialty: ${hospital.specialty}\n   Distance: ${hospital.distance} km\n`;
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+
+        // Find Nearby Doctors
+        async function findNearbyDoctors() {
+            const resultDiv = document.getElementById('doctorsResult');
+            resultDiv.innerHTML = 'Finding nearby doctors...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/nearby-doctors?lat=28.6139&lng=77.2090&radius=10&limit=5`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `<span class="success">✓ Found ${data.doctors.length} doctors:</span>\n`;
+                data.doctors.forEach((doctor, index) => {
+                    resultDiv.innerHTML += `\n${index + 1}. Dr. ${doctor.name}\n   Specialization: ${doctor.specialization}\n   Hospital: ${doctor.hospital_info.hospital_name}\n   Experience: ${doctor.experience_years} years\n   Distance: ${doctor.distance} km\n`;
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+
+        async function findCardiologists() {
+            const resultDiv = document.getElementById('doctorsResult');
+            resultDiv.innerHTML = 'Finding cardiologists...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/nearby-doctors?lat=28.6139&lng=77.2090&radius=15&specialization=cardiology&limit=8`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `<span class="success">✓ Found ${data.doctors.length} cardiologists:</span>\n`;
+                data.doctors.forEach((doctor, index) => {
+                    resultDiv.innerHTML += `\n${index + 1}. Dr. ${doctor.name}\n   Specialization: ${doctor.specialization}\n   Hospital: ${doctor.hospital_info.hospital_name}\n   Experience: ${doctor.experience_years} years\n   Distance: ${doctor.distance} km\n`;
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+
+        // Combined Healthcare Search
+        async function findNearbyHealthcare() {
+            const resultDiv = document.getElementById('healthcareResult');
+            resultDiv.innerHTML = 'Finding nearby healthcare...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/location/nearby-healthcare?lat=28.6139&lng=77.2090&radius=10&hospitalLimit=2&doctorLimit=3`);
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `<span class="success">✓ Combined Healthcare Results:</span>\n\n`;
+                resultDiv.innerHTML += `HOSPITALS (${data.hospitals.length}):\n`;
+                data.hospitals.forEach((hospital, index) => {
+                    resultDiv.innerHTML += `${index + 1}. ${hospital.name} (${hospital.distance} km)\n`;
+                });
+                
+                resultDiv.innerHTML += `\nDOCTORS (${data.doctors.length}):\n`;
+                data.doctors.forEach((doctor, index) => {
+                    resultDiv.innerHTML += `${index + 1}. Dr. ${doctor.name} - ${doctor.specialization} (${doctor.distance} km)\n`;
+                });
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">✗ Error:</span>\n${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
