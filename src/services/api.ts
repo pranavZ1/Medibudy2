@@ -2,17 +2,12 @@ import axios from 'axios';
 
 // Determine API base URL based on environment
 const getApiBaseUrl = () => {
-  // If explicitly set via environment variable, use that
-  if (process.env.REACT_APP_API_URL) {
-    return process.env.REACT_APP_API_URL;
-  }
-  
-  // In production (on Netlify), use Railway backend
+  // In production, the API is at the same origin, under /api
   if (process.env.NODE_ENV === 'production') {
-    return 'https://web-production-4fc87.up.railway.app/api';
+    return '/api';
   }
-  
-  // For local development
+
+  // For local development, use the local backend URL
   return 'http://localhost:5001/api';
 };
 
