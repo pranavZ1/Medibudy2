@@ -98,7 +98,7 @@ const BookConsultation: React.FC = () => {
       submitData.append('bookingDate', new Date().toISOString());
 
       // Submit to backend
-      const response = await api.post('/appointments', submitData, {
+      await api.post('/appointments', submitData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

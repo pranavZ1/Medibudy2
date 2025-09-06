@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { aiAPI, locationAPI } from '../services/api';
+import { aiAPI } from '../services/api';
 import { useLocation } from '../contexts/LocationContext';
-import LocationSelector from '../components/LocationSelector';
 import { 
   Search, 
   Plus, 
@@ -10,12 +9,7 @@ import {
   CheckCircle, 
   Brain,
   Stethoscope,
-  FileText,
-  MapPin,
-  Hospital,
-  User,
-  Star,
-  Navigation2
+  FileText
 } from 'lucide-react';
 
 interface AnalysisResult {
@@ -77,49 +71,46 @@ interface DiseaseDetails {
   };
 }
 
-interface Hospital {
-  _id: string;
-  name: string;
-  location: {
-    address: string;
-    city: string;
-    state: string;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
-  };
-  specialties: Array<{
-    name: string;
-    description: string;
-  }>;
-  ratings: {
-    overall: number;
-  };
-  distance?: number;
-}
+// Commented out unused interfaces - keeping for future use
+// interface Hospital {
+//   _id: string;
+//   name: string;
+//   location: {
+//     address: string;
+//     city: string;
+//     state: string;
+//     coordinates: {
+//       lat: number;
+//       lng: number;
+//     };
+//   };
+//   specialties: Array<{
+//     name: string;
+//     description: string;
+//   }>;
+//   ratings: {
+//     overall: number;
+//   };
+//   distance?: number;
+// }
 
-interface Doctor {
-  _id: string;
-  name: string;
-  specialization: string;
-  experience_years: number;
-  rating: {
-    value: number;
-    total_reviews: number;
-  };
-  location: {
-    city: string;
-    state: string;
-  };
-  hospital: {
-    name: string;
-  };
-  distance?: number;
-}
+// interface Doctor {
+//   _id: string;
+//   name: string;
+//   specialization: string;
+//   experience_years: number;
+//   rating: {
+//     average: number;
+//     total_reviews: number;
+//   };
+//   hospital: {
+//     name: string;
+//   };
+//   distance?: number;
+// }
 
 const SymptomChecker: React.FC = () => {
-  const { userLocation, isLoadingLocation } = useLocation();
+  const { userLocation } = useLocation();
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [currentSymptom, setCurrentSymptom] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
@@ -127,13 +118,13 @@ const SymptomChecker: React.FC = () => {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState('');
   
-  // Location and healthcare provider states
-  const [showLocationSelector, setShowLocationSelector] = useState(false);
-  const [nearbyHospitals, setNearbyHospitals] = useState<Hospital[]>([]);
-  const [nearbyDoctors, setNearbyDoctors] = useState<Doctor[]>([]);
-  const [loadingHealthcare, setLoadingHealthcare] = useState(false);
-  const [healthcareError, setHealthcareError] = useState('');
-  const [showNearbyProviders, setShowNearbyProviders] = useState(false);
+  // Location and healthcare provider states (keeping for future use)
+  // const [showLocationSelector, setShowLocationSelector] = useState(false);
+  // const [nearbyHospitals, setNearbyHospitals] = useState<Hospital[]>([]);
+  // const [nearbyDoctors, setNearbyDoctors] = useState<Doctor[]>([]);
+  // const [loadingHealthcare, setLoadingHealthcare] = useState(false);
+  // const [healthcareError, setHealthcareError] = useState('');
+  // const [showNearbyProviders, setShowNearbyProviders] = useState(false);
 
   // Disease details modal states
   const [showDiseaseModal, setShowDiseaseModal] = useState(false);
@@ -159,36 +150,37 @@ const SymptomChecker: React.FC = () => {
     setSymptoms(symptoms.filter((_, i) => i !== index));
   };
 
-  const fetchNearbyHealthcare = async () => {
-    if (!userLocation) {
-      setHealthcareError('Location not available. Please enable location services or select manually.');
-      return;
-    }
+  // Commented out unused function - keeping for future use
+  // const fetchNearbyHealthcare = async () => {
+  //   if (!userLocation) {
+  //     setHealthcareError('Location not available. Please enable location services or select manually.');
+  //     return;
+  //   }
 
-    setLoadingHealthcare(true);
-    setHealthcareError('');
+  //   setLoadingHealthcare(true);
+  //   setHealthcareError('');
 
-    try {
-      const response = await locationAPI.getNearbyHealthcare(
-        userLocation.lat,
-        userLocation.lng,
-        50, // radius in km
-        undefined, // specialty
-        undefined, // specialization
-        5, // hospital limit
-        10 // doctor limit
-      );
+  //   try {
+  //     const response = await locationAPI.getNearbyHealthcare(
+  //       userLocation.lat,
+  //       userLocation.lng,
+  //       50, // radius in km
+  //       undefined, // specialty
+  //       undefined, // specialization
+  //       5, // hospital limit
+  //       10 // doctor limit
+  //     );
 
-      setNearbyHospitals(response.data.hospitals || []);
-      setNearbyDoctors(response.data.doctors || []);
-      setShowNearbyProviders(true);
-    } catch (err: any) {
-      setHealthcareError('Failed to fetch nearby healthcare providers');
-      console.error('Error fetching nearby healthcare:', err);
-    } finally {
-      setLoadingHealthcare(false);
-    }
-  };
+  //     setNearbyHospitals(response.data.hospitals || []);
+  //     setNearbyDoctors(response.data.doctors || []);
+  //     setShowNearbyProviders(true);
+  //   } catch (err: any) {
+  //     setHealthcareError('Failed to fetch nearby healthcare providers');
+  //     console.error('Error fetching nearby healthcare:', err);
+  //   } finally {
+  //     setLoadingHealthcare(false);
+  //   }
+  // };
 
   const handleDiseaseClick = async (diseaseName: string) => {
     setSelectedDisease(diseaseName);
@@ -271,7 +263,7 @@ const SymptomChecker: React.FC = () => {
     setLoading(true);
     setError('');
     setResult(null);
-    setShowNearbyProviders(false);
+    // setShowNearbyProviders(false); // Commented out - keeping for future use
 
     try {
       // Prepare the request data with user location if available
@@ -293,14 +285,14 @@ const SymptomChecker: React.FC = () => {
       const response = await aiAPI.analyzeSymptoms(symptoms, additionalInfo, requestData.userLocation);
       setResult(response.data.analysis);
       
-      // Extract hospitals and doctors from the response
-      const nearbyData = response.data.analysis.nearbyHospitals;
-      if (nearbyData) {
-        setNearbyHospitals(nearbyData.hospitals || []);
-        setNearbyDoctors(nearbyData.doctors || []);
-        setShowNearbyProviders(true);
-        console.log(`Found ${nearbyData.totalHospitalsFound || 0} hospitals and ${nearbyData.totalDoctorsFound || 0} doctors`);
-      }
+      // Extract hospitals and doctors from the response (commented out - keeping for future use)
+      // const nearbyData = response.data.analysis.nearbyHospitals;
+      // if (nearbyData) {
+      //   setNearbyHospitals(nearbyData.hospitals || []);
+      //   setNearbyDoctors(nearbyData.doctors || []);
+      //   setShowNearbyProviders(true);
+      //   console.log(`Found ${nearbyData.totalHospitalsFound || 0} hospitals and ${nearbyData.totalDoctorsFound || 0} doctors`);
+      // }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to analyze symptoms');
     } finally {
@@ -673,11 +665,11 @@ const SymptomChecker: React.FC = () => {
                 </div>
               </div>
 
-              {/* Nearby Healthcare Providers */}
-              {showNearbyProviders && nearbyDoctors.length > 0 && (
+              {/* Nearby Healthcare Providers - Commented out for now */}
+              {/* {showNearbyProviders && nearbyDoctors.length > 0 && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                   {/* Nearby Doctors */}
-                  <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
+                  {/* <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>
                     <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <User style={{ height: '20px', width: '20px' }} />
                       <span>Recommended Doctors ({nearbyDoctors.length})</span>
@@ -724,7 +716,7 @@ const SymptomChecker: React.FC = () => {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           ) : (
             <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)', border: '1px solid #e5e7eb' }}>

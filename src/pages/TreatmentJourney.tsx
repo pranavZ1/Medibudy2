@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Clock, Star, ArrowRight, Navigation, Loader, Phone, Calendar } from 'lucide-react';
+import { Search, MapPin, Star, ArrowRight, Navigation, Loader, Phone, Calendar } from 'lucide-react';
 import { useLocation } from '../contexts/LocationContext';
 import api from '../services/api';
 

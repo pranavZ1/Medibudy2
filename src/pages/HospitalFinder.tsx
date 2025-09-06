@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { MapPin, Search, Phone, Navigation, Star, Building2, Heart, Users, Award, AlertCircle, Loader2, X, Calendar, Mail, Globe, Shield, Bed, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Search, Phone, Navigation, Star, Building2, Heart, Users, Award, AlertCircle, Loader2, X, Mail, Globe, Shield, Bed, Clock, ArrowLeft, ChevronRight } from 'lucide-react';
 import { locationAPI, hospitalAPI } from '../services/api';
 
 interface Hospital {
@@ -146,32 +146,6 @@ interface UserLocation {
   lng: number;
   address: string;
 }
-
-// Helper function to render star ratings
-const renderStars = (rating: number) => {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating % 1 >= 0.5;
-  const stars = [];
-
-  for (let i = 0; i < 5; i++) {
-    if (i < fullStars) {
-      stars.push(<Star key={i} style={{ height: '14px', width: '14px', color: '#fbbf24', fill: '#fbbf24' }} />);
-    } else if (i === fullStars && hasHalfStar) {
-      stars.push(<Star key={i} style={{ height: '14px', width: '14px', color: '#fbbf24', fill: 'url(#half)' }} />);
-    } else {
-      stars.push(<Star key={i} style={{ height: '14px', width: '14px', color: '#e5e7eb' }} />);
-    }
-  }
-
-  return stars;
-};
-
-// Helper function to get directions
-const openDirections = (hospital: Hospital) => {
-  const { lat, lng } = hospital.location.coordinates;
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-  window.open(url, '_blank');
-};
 
 const HospitalFinder: React.FC = () => {
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
@@ -335,10 +309,11 @@ const HospitalFinder: React.FC = () => {
     } finally {
       setLocationLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch hospitals for given coordinates
-  const fetchHospitalsForLocation = async (lat: number, lng: number) => {
+  const fetchHospitalsForLocation = useCallback(async (lat: number, lng: number) => {
     setLoading(true);
     try {
       console.log('🏥 Fetching hospitals for coordinates:', lat, lng, 'radius:', searchRadius, 'specialty:', selectedSpecialty);
@@ -377,7 +352,7 @@ const HospitalFinder: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchRadius, selectedSpecialty, selectedRating]);
 
   // Geocode city name to coordinates
   const geocodeLocation = async (cityName: string) => {
@@ -446,6 +421,7 @@ const HospitalFinder: React.FC = () => {
     if (currentCoords) {
       fetchHospitalsForLocation(currentCoords.lat, currentCoords.lng);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSpecialty, searchRadius, selectedRating]);
 
   // Fetch detailed hospital information
