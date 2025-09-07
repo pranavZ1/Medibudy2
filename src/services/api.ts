@@ -4,7 +4,7 @@ import axios from 'axios';
 const getApiBaseUrl = () => {
   // In production, the API is at the same origin, under /api
   if (process.env.NODE_ENV === 'production') {
-    return '/api';
+    return 'https://medibudy2.onrender.com/api';
   }
 
   // For local development, use the local backend URL
